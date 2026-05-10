@@ -1,4 +1,4 @@
-def superviser(state):
+def supervisor(state):
   """"
    Supervisor Agent
 
