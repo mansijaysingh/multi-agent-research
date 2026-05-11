@@ -21,24 +21,29 @@ def writer_agent(state):
 
        combined_summaries="\n\n".join(summaries)
 
-       prompt= f"""
-You are a professional research report writer.
+       prompt = f"""
+You are an expert research report writer.
 
-Write a detailed research report on:
+Write a detailed, professional, and well-structured research report.
 
-Topic:
+Research Topic:
 {query}
 
-Using the summaries below.
+Based on these research summaries:
+{combined_summaries}
 
-The report must contain:
+Requirements:
+- Use clear headings
+- Keep the report informative and easy to read
+- Avoid repetition
+- Explain key insights properly
+- Make the report professional and polished
+
+The report must include:
 
 1. Introduction
 2. Key Findings
 3. Conclusion
-
-Summaries:
-{combined_summaries}
 """
        response=client.chat.completions.create(
            model="gpt-4o-mini",
