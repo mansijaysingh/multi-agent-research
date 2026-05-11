@@ -17,26 +17,28 @@
 Type any research topic — the system automatically dispatches 4 specialized AI agents that work together to deliver a clean, structured research report in seconds.
 
 **Example:**
-
-Input: "Research the impact of AI on healthcare"
+```
+Input:  "Research the impact of AI on healthcare"
 Output: A full structured report with Introduction, Key Findings, and Conclusion
+```
 
 ---
 
 ## 🧠 How It Works — Agent Architecture
 
+```
 User Input
-↓
-[Supervisor Agent] ── reads the query, orchestrates the workflow
-↓
-[Search Agent] ── searches the web using Tavily API (5-10 sources)
-↓
-[Summarizer Agent] ── extracts key information from each source
-↓
-[Writer Agent] ── compiles a well-structured final report
-↓
+    ↓
+[Supervisor Agent]   ──  reads the query, orchestrates the workflow
+    ↓
+[Search Agent]       ──  searches the web using Tavily API (5-10 sources)
+    ↓
+[Summarizer Agent]   ──  extracts key information from each source
+    ↓
+[Writer Agent]       ──  compiles a well-structured final report
+    ↓
 Final Research Report → User
-
+```
 
 All agents are connected as **nodes in a LangGraph StateGraph**, sharing a single state object that carries data from one agent to the next.
 
@@ -68,21 +70,22 @@ All agents are connected as **nodes in a LangGraph StateGraph**, sharing a singl
 
 ## 📁 Project Structure
 
+```
 multi-agent-research/
 │
 ├── agents/
-│ ├── supervisor.py # Reads query, initializes state
-│ ├── search_agent.py # Web search using Tavily
-│ ├── summarizer_agent.py # Summarizes search results
-│ └── writer_agent.py # Writes the final report
+│   ├── supervisor.py        # Reads query, initializes state
+│   ├── search_agent.py      # Web search using Tavily
+│   ├── summarizer_agent.py  # Summarizes search results
+│   └── writer_agent.py      # Writes the final report
 │
 ├── graph/
-│ └── workflow.py # LangGraph StateGraph definition
+│   └── workflow.py          # LangGraph StateGraph definition
 │
-├── app.py # Streamlit UI
+├── app.py                   # Streamlit UI
 ├── requirements.txt
 └── README.md
-
+```
 
 ---
 
@@ -92,27 +95,45 @@ multi-agent-research/
 ```bash
 git clone https://github.com/mansijaysingh/multi-agent-research.git
 cd multi-agent-research
+```
 
-2. Install Dependencies
+### 2. Install Dependencies
+```bash
 pip install -r requirements.txt
+```
 
-3. Set Up API Keys
-Create a .env file in the root directory:
+### 3. Set Up API Keys
+
+Create a `.env` file in the root directory:
+```env
 OPENAI_API_KEY=your_openai_api_key
 TAVILY_API_KEY=your_tavily_api_key
-Get your Tavily API key for free at app.tavily.com
+```
 
-4. Run the App
+> Get your Tavily API key for free at [app.tavily.com](https://app.tavily.com)
+
+### 4. Run the App
+```bash
 streamlit run app.py
-The app will open in your browser at http://localhost:8501
+```
 
-💻 How to Use
-Open the app in your browser
-Type any research topic in the input field
-Click "Generate Report"
-Wait a few seconds while the agents work
-Read your structured research report!
-🔧 How LangGraph Connects the Agents
+The app will open in your browser at `http://localhost:8501`
+
+---
+
+## 💻 How to Use
+
+1. Open the app in your browser
+2. Type any research topic in the input field
+3. Click **"Generate Report"**
+4. Wait a few seconds while the agents work
+5. Read your structured research report!
+
+---
+
+## 🔧 How LangGraph Connects the Agents
+
+```python
 from langgraph.graph import StateGraph
 from typing import TypedDict
 
@@ -135,8 +156,13 @@ graph.add_edge("search",      "summarizer")
 graph.add_edge("summarizer",  "writer")
 
 app = graph.compile()
+```
 
-📦 Requirements
+---
+
+## 📦 Requirements
+
+```
 langchain
 langchain-openai
 langchain-community
@@ -145,8 +171,18 @@ tavily-python
 streamlit
 python-dotenv
 openai
+```
 
-🙋 About
-Built by Mansi Singh — AI Developer specializing in LLM applications, LangChain, RAG, and agentic workflows.
+---
 
-⭐ If you found this useful, give it a star!
+## 🙋 About
+
+Built by **Mansi Singh** — AI Developer specializing in LLM applications, LangChain, RAG, and agentic workflows.
+
+[![GitHub](https://img.shields.io/badge/GitHub-mansijaysingh-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/mansijaysingh)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-mansi--ai-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/mansi-ai)
+[![Portfolio](https://img.shields.io/badge/Portfolio-mansijaysingh.netlify.app-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://mansijaysingh.netlify.app)
+
+---
+
+## ⭐ If you found this useful, give it a star!
