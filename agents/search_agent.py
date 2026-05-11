@@ -4,9 +4,10 @@ import os
 
 load_dotenv()
 
-search_tool=TavilySearchResults(max_results=5)
+
 
 def search_agent(state):
+  search_tool=TavilySearchResults(max_results=5)
   """
     Search agent:
     Takes query from state
