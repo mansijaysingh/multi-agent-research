@@ -15,26 +15,31 @@ def writer_agent(state):
     """
    
    try:
-       
+       query=state["query"]
+
        summaries=state["summaries"]
 
        combined_summaries="\n\n".join(summaries)
 
        prompt= f"""
-       You are a research report writer.
+You are a professional research report writer.
 
-       Using the summaries below,
-       create a prifessional research report.
+Write a detailed research report on:
 
-       The report must contain:
+Topic:
+{query}
 
-       1.Introduction
-       2.Key Findings
-       3.Conclusion
+Using the summaries below.
 
-       Summaries:
-       {combined_summaries}
-"""   
+The report must contain:
+
+1. Introduction
+2. Key Findings
+3. Conclusion
+
+Summaries:
+{combined_summaries}
+"""
        response=client.chat.completions.create(
            model="gpt-4o-mini",
            messages=[
