@@ -22,13 +22,20 @@ def summarizer_agent(state):
          
          content= result.get("content", " ")
 
-         prompt= f"""
-         Summarize the following research content clearly in 4-5 lines:
-         
-         Content:
-         {content}
+         prompt = f"""
+You are an expert research summarizer.
 
-         """
+Read the research content below and create a clear, concise, and informative summary.
+
+Requirements:
+- Focus on the most important insights
+- Avoid unnecessary details
+- Keep the summary professional and easy to understand
+- Use simple and clean language
+
+Research Content:
+{content}
+"""
 
          response=client.chat.completions.create(
             model="gpt-4o-mini",
