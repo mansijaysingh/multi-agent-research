@@ -10,5 +10,6 @@ def supervisor(state):
   query=state["query"]
 
   print(f"\n📌 User Query: {query}")
+  state["query"] = query
 
   return state

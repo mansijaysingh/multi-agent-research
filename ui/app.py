@@ -60,6 +60,7 @@ if generate:
 ⏳ Writer Agent Waiting
 """)
       result=app.invoke(initial_state)
+      
 
       status_box.markdown("""
 ### Current Status
@@ -71,9 +72,11 @@ if generate:
 """)
 
     final_report= result["final_report"]
+    
 
     st.markdown("---")
     st.subheader("📄 Final Research Report")
+    
     st.markdown("---")
     with st.container(border=True):
      st.markdown(final_report)

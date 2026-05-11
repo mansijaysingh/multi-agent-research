@@ -11,7 +11,7 @@ from agents.writer_agent import writer_agent
 class AgentState(TypedDict):
 
   query:str
-  search_agent:list
+  search_results: list
   summaries: list
   final_report:str
 
