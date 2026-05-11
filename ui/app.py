@@ -69,4 +69,7 @@ if generate:
 
     st.markdown("---")
     st.subheader("📄 Final Research Report")
-    st.markdown(final_report)
+    st.markdown("---")
+    with st.container(border=True):
+     st.markdown(final_report)
+    st.markdown("---")
