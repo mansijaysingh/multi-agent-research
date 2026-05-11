@@ -17,3 +17,136 @@
 Type any research topic — the system automatically dispatches 4 specialized AI agents that work together to deliver a clean, structured research report in seconds.
 
 **Example:**
+
+Input: "Research the impact of AI on healthcare"
+Output: A full structured report with Introduction, Key Findings, and Conclusion
+
+---
+
+## 🧠 How It Works — Agent Architecture
+
+User Input
+↓
+[Supervisor Agent] ── reads the query, orchestrates the workflow
+↓
+[Search Agent] ── searches the web using Tavily API (5-10 sources)
+↓
+[Summarizer Agent] ── extracts key information from each source
+↓
+[Writer Agent] ── compiles a well-structured final report
+↓
+Final Research Report → User
+
+
+All agents are connected as **nodes in a LangGraph StateGraph**, sharing a single state object that carries data from one agent to the next.
+
+---
+
+## ✨ Features
+
+- 🔍 **Real-time web search** using Tavily API — not outdated training data
+- 🤖 **4 specialized agents** each with a dedicated role
+- 🧠 **LangGraph orchestration** — reliable, stateful multi-agent workflow
+- 📝 **Structured reports** with Introduction, Key Findings, and Conclusion
+- 🌐 **Clean Streamlit UI** — simple input, instant output
+- ⚡ **Fast and cost-efficient** using GPT-4o-mini
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Agent Framework | LangGraph |
+| LLM | OpenAI GPT-4o-mini |
+| Web Search | Tavily API |
+| Backend | Python |
+| UI | Streamlit |
+| Deployment | Streamlit Cloud / Render |
+
+---
+
+## 📁 Project Structure
+
+multi-agent-research/
+│
+├── agents/
+│ ├── supervisor.py # Reads query, initializes state
+│ ├── search_agent.py # Web search using Tavily
+│ ├── summarizer_agent.py # Summarizes search results
+│ └── writer_agent.py # Writes the final report
+│
+├── graph/
+│ └── workflow.py # LangGraph StateGraph definition
+│
+├── app.py # Streamlit UI
+├── requirements.txt
+└── README.md
+
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/mansijaysingh/multi-agent-research.git
+cd multi-agent-research
+
+2. Install Dependencies
+pip install -r requirements.txt
+
+3. Set Up API Keys
+Create a .env file in the root directory:
+OPENAI_API_KEY=your_openai_api_key
+TAVILY_API_KEY=your_tavily_api_key
+Get your Tavily API key for free at app.tavily.com
+
+4. Run the App
+streamlit run app.py
+The app will open in your browser at http://localhost:8501
+
+💻 How to Use
+Open the app in your browser
+Type any research topic in the input field
+Click "Generate Report"
+Wait a few seconds while the agents work
+Read your structured research report!
+🔧 How LangGraph Connects the Agents
+from langgraph.graph import StateGraph
+from typing import TypedDict
+
+class AgentState(TypedDict):
+    query: str
+    search_results: list
+    summaries: list
+    final_report: str
+
+graph = StateGraph(AgentState)
+
+graph.add_node("supervisor",  supervisor_agent)
+graph.add_node("search",      search_agent)
+graph.add_node("summarizer",  summarizer_agent)
+graph.add_node("writer",      writer_agent)
+
+graph.set_entry_point("supervisor")
+graph.add_edge("supervisor",  "search")
+graph.add_edge("search",      "summarizer")
+graph.add_edge("summarizer",  "writer")
+
+app = graph.compile()
+
+📦 Requirements
+langchain
+langchain-openai
+langchain-community
+langgraph
+tavily-python
+streamlit
+python-dotenv
+openai
+
+🙋 About
+Built by Mansi Singh — AI Developer specializing in LLM applications, LangChain, RAG, and agentic workflows.
+
+⭐ If you found this useful, give it a star!
