@@ -29,6 +29,10 @@ query=st.text_input(
   "Enter your research topic:"
 )
 
+report_length=st.selectbox(
+  "Select report length:",
+  ["Short", "Detailed"]
+)
 # ---------------- BUTTON ----------------
 
 generate=st.button("🚀 Generate Report")
@@ -42,7 +46,8 @@ if generate:
   else:
     
     initial_state={
-      "query":query
+      "query":query,
+      "report_length":report_length
     }
 
     with st.spinner("🤖 AI Agents are working on your report..."):

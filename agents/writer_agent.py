@@ -16,6 +16,7 @@ def writer_agent(state):
    
    try:
        query=state["query"]
+       report_length = state["report_length"]
 
        summaries=state["summaries"]
 
@@ -28,6 +29,9 @@ Write a detailed, professional, and well-structured research report.
 
 Research Topic:
 {query}
+
+Report Length:
+{report_length}
 
 Based on these research summaries:
 {combined_summaries}
