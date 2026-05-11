@@ -19,18 +19,9 @@ st.markdown("---")
 
 # ---------------- SIDEBAR ----------------
 
-st.sidebar.title("⚙️ Workflow")
+st.sidebar.title("⚙️ Agent Workflow")
 
-st.sidebar.markdown("""
-### Agents Used
-
-✅ Supervisor Agent  
-✅ Search Agent  
-✅ Summarizer Agent  
-✅ Writer Agent
-"""
-  
-)
+status_box = st.sidebar.empty()
 
 # ---------------- USER INPUT ----------------
 
@@ -55,8 +46,24 @@ if generate:
     }
 
     with st.spinner("🤖 AI Agents are working on your report..."):
+      status_box.markdown("""
+### Current Status
 
+🔄 Supervisor Agent Running  
+⏳ Search Agent Waiting  
+⏳ Summarizer Agent Waiting  
+⏳ Writer Agent Waiting
+""")
       result=app.invoke(initial_state)
+
+      status_box.markdown("""
+### Current Status
+
+✅ Supervisor Agent Completed  
+✅ Search Agent Completed  
+✅ Summarizer Agent Completed  
+✅ Writer Agent Completed
+""")
 
     final_report= result["final_report"]
 
