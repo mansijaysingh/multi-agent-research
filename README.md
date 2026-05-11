@@ -8,7 +8,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
 [![LangGraph](https://img.shields.io/badge/LangGraph-FF6B6B?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
 
-🔗 **[Live Demo](#)** &nbsp;|&nbsp; 📂 **[GitHub Repo](https://github.com/mansijaysingh/multi-agent-research)**
+🔗 **[Live Demo](https://multi-agent-research-npcdcfptpcfjxfcplhunpk.streamlit.app/)** &nbsp;|&nbsp; 📂 **[GitHub Repo](https://github.com/mansijaysingh/multi-agent-research)**
 
 ---
 
