@@ -1,10 +1,10 @@
-from openai import OpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
-import os
+from config import MODEL
 
 load_dotenv()
 
-client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.3)
 
 
 def writer_agent(state):
@@ -46,17 +46,9 @@ The report must include:
 2. Key Findings
 3. Conclusion
 """
-       response=client.chat.completions.create(
-           model="gpt-4o-mini",
-           messages=[
-               {
-                   "role":"user",
-                   "content":prompt
-               }
-           ]
-       )
+       response = llm.invoke(prompt)
 
-       final_report=response.choices[0].message.content
+       final_report=response.text
 
        state["final_report"]=final_report
        return state

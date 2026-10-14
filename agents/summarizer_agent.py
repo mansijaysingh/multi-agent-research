@@ -1,16 +1,16 @@
-from openai import OpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
-import os
+from config import MODEL
 
 load_dotenv()
 
-client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.2)
 
 
 def summarizer_agent(state):
   """
     Takes search results from state
-    Summarizes them using GPT
+    Summarizes them using Gemini
     Stores summaries back in state
     """
   try: 
@@ -37,17 +37,9 @@ Research Content:
 {content}
 """
 
-         response=client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-               {
-                  "role":"user",
-                  "content":prompt
-               }
-            ]
-         )
+         response = llm.invoke(prompt)
 
-         summary=response.choices[0].message.content
+         summary=response.text
          summaries.append(summary)
 
       state["summaries"]=summaries
