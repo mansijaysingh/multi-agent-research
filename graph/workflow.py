@@ -1,19 +1,12 @@
-from typing import TypedDict
 from langgraph.graph import StateGraph, END
+
+from graph.state import AgentState
 
 #import agents
 from agents.supervisor import supervisor
 from agents.search_agent import search_agent
 from agents.summarizer_agent import summarizer_agent
 from agents.writer_agent import writer_agent
-
-
-class AgentState(TypedDict):
-
-  query:str
-  search_results: list
-  summaries: list
-  final_report:str
 
 
 # Add nodes

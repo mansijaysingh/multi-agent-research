@@ -59,24 +59,44 @@ if generate:
 ⏳ Writer Agent Waiting
 """)
       result=app.invoke(initial_state)
-      
 
-      status_box.markdown("""
-### Current Status
+    error = result.get("error")
+    sources = result.get("sources", [])
 
-✅ Supervisor Agent Completed  
-✅ Search Agent Completed  
-✅ Summarizer Agent Completed  
-✅ Writer Agent Completed
-""")
+    # The first stage without output is the one that failed; later ones were skipped
+    stages = [
+      ("Search Agent", bool(sources)),
+      ("Summarizer Agent", bool(result.get("summaries"))),
+      ("Writer Agent", bool(result.get("final_report"))),
+    ]
+    lines = ["✅ Supervisor Agent Completed  "]
+    failed = False
+    for name, done in stages:
+      if done:
+        lines.append(f"✅ {name} Completed  ")
+      elif not failed:
+        lines.append(f"❌ {name} Failed  ")
+        failed = True
+      else:
+        lines.append(f"⏭️ {name} Skipped  ")
 
-    final_report= result["final_report"]
-    
+    status_box.markdown("### Current Status\n\n" + "\n".join(lines))
 
-    st.markdown("---")
-    st.subheader("📄 Final Research Report")
-    
-    st.markdown("---")
-    with st.container(border=True):
-     st.markdown(final_report)
-    st.markdown("---")
+    if error:
+      st.error(error)
+
+    else:
+      final_report= result["final_report"]
+
+      st.markdown("---")
+      st.subheader("📄 Final Research Report")
+
+      st.markdown("---")
+      with st.container(border=True):
+       st.markdown(final_report)
+      st.markdown("---")
+
+    if sources:
+      st.subheader("🔗 Sources")
+      for s in sources:
+        st.markdown(f"{s['id']}. [{s['title'] or s['url']}]({s['url']})")

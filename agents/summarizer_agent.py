@@ -9,18 +9,22 @@ llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.2)
 
 def summarizer_agent(state):
   """
-    Takes search results from state
-    Summarizes them using Gemini
-    Stores summaries back in state
+    Takes sources from state
+    Summarizes each one using Gemini
+    Returns summaries and the ids of sources that failed
     """
-  try: 
-      search_results=state["search_results"]
+  # Temporary: skip if an earlier node failed. Supervisor routing replaces this in Step 3
+  if state.get("error"):
+      return {}
 
-      summaries=[]
+  sources = state.get("sources", [])
 
-      for result in search_results:
-         
-         content= result.get("content", " ")
+  summaries = []
+  failed = []
+
+  for s in sources:
+      try:
+         content = s.get("content", " ")
 
          prompt = f"""
 You are an expert research summarizer.
@@ -39,35 +43,8 @@ Research Content:
 
          response = llm.invoke(prompt)
 
-         summary=response.text
-         summaries.append(summary)
+         summaries.append({"source_id": s["id"], "text": response.text})
+      except Exception:
+         failed.append(s["id"])
 
-      state["summaries"]=summaries
-      return state
-  except Exception as e:
-     
-     state["summaries"]=[f"Error:{str(e)}"]
-     return state
-  
-
-if __name__ == "__main__":
-   
-   dummy_state={
-      "search_results":[
-         {
-            "content": "AI is transforming healthcare through diagnosis automation and predictive analytics."
-         },
-
-         {
-            "content": "Hospitals are using AI chatbots to improve patient communication and reduce workload."
-         }
-      ]
-   }
-
-   output=summarizer_agent(dummy_state)
-
-   print("\n✅ SUMMARIES:\n")
-
-   for summary in output["summaries"]:
-      print(summary)
-      print("\n------------------\n")
+  return {"summaries": summaries, "failed_sources": failed}

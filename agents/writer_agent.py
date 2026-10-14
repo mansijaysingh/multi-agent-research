@@ -11,16 +11,21 @@ def writer_agent(state):
    """
     Takes summaries from state
     Generates final research report
-    Stores report in state
+    Returns the report, or an error if it can't write one
     """
-   
+   # Temporary: skip if an earlier node failed. Supervisor routing replaces this in Step 3
+   if state.get("error"):
+       return {}
+
+   summaries = state.get("summaries", [])
+   if not summaries:
+       return {"error": "no summaries to write a report from"}
+
    try:
        query=state["query"]
     #    report_length = state["report_length"]
 
-       summaries=state["summaries"]
-
-       combined_summaries="\n\n".join(summaries)
+       combined_summaries = "\n\n".join(m["text"] for m in summaries)
 
        prompt = f"""
 You are an expert research report writer.
@@ -48,29 +53,7 @@ The report must include:
 """
        response = llm.invoke(prompt)
 
-       final_report=response.text
+       return {"final_report": response.text}
 
-       state["final_report"]=final_report
-       return state
-   
    except Exception as e:
-       state["final_report"]=f"Error: {str(e)}"
-       return state
-   
-
-
-if __name__ == "__main__":
-    
-    dummy_state={
-        "summaries": [
-            "AI is improving healthcare diagnosis systems.",
-            "Hospitals use AI chatbots for patient interaction.",
-            "Predictive analytics helps detect diseases early."
-        ]
-    }
-
-    output=writer_agent(dummy_state)
-
-    print("\n✅ FINAL REPORT:\n")
-
-    print(output["final_report"])
+       return {"error": f"writer failed: {e}"}
