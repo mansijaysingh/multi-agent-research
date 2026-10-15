@@ -8,26 +8,22 @@ llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.3)
 
 
 def writer_agent(state):
-   """
+    """
     Takes summaries from state
     Generates final research report
     Returns the report, or an error if it can't write one
     """
-   # Temporary: skip if an earlier node failed. Supervisor routing replaces this in Step 3
-   if state.get("error"):
-       return {}
+    summaries = state.get("summaries", [])
+    if not summaries:
+        return {"error": "no summaries to write a report from"}
 
-   summaries = state.get("summaries", [])
-   if not summaries:
-       return {"error": "no summaries to write a report from"}
+    try:
+        query=state["query"]
+        #    report_length = state["report_length"]
 
-   try:
-       query=state["query"]
-    #    report_length = state["report_length"]
+        combined_summaries = "\n\n".join(m["text"] for m in summaries)
 
-       combined_summaries = "\n\n".join(m["text"] for m in summaries)
-
-       prompt = f"""
+        prompt = f"""
 You are an expert research report writer.
 
 Write a detailed, professional, and well-structured research report.
@@ -51,9 +47,10 @@ The report must include:
 2. Key Findings
 3. Conclusion
 """
-       response = llm.invoke(prompt)
+        response = llm.invoke(prompt)
 
-       return {"final_report": response.text}
+        # Clear any earlier error (e.g. a failed retry search) now that there is a report
+        return {"final_report": response.text, "error": None}
 
-   except Exception as e:
-       return {"error": f"writer failed: {e}"}
+    except Exception as e:
+        return {"error": f"writer failed: {e}"}

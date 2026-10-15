@@ -8,7 +8,6 @@ from tavily import TavilyClient
 load_dotenv()
 
 mcp = FastMCP("research-search")
-tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 
 
 @mcp.tool()
@@ -22,11 +21,16 @@ def web_search(query: str, max_results: int = 5) -> dict:
     Returns {"results": [{"title", "url", "content"}, ...]}.
     Raises an error if the query is empty or the search fails.
     """
+    # Read the key here, not at import: a missing key then comes back as a clear
+    # tool error instead of the server crashing before it starts.
+    api_key = os.environ.get("TAVILY_API_KEY")
+    if not api_key:
+        raise ValueError("TAVILY_API_KEY is not set")
     if not query.strip():
         raise ValueError("query must not be empty")
     max_results = min(max(max_results, 1), 10)
 
-    resp = tavily.search(query=query, max_results=max_results)
+    resp = TavilyClient(api_key=api_key).search(query=query, max_results=max_results)
     results = [
         {"title": r.get("title", ""), "url": r["url"], "content": r.get("content", "")}
         for r in resp.get("results", [])
