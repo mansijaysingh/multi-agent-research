@@ -1,7 +1,7 @@
 import uuid
 
 import streamlit as st
-from config import RECURSION_LIMIT
+from config import MAX_RUNS_PER_SESSION, RECURSION_LIMIT
 from graph.workflow import app
 
 # ---------------- PAGE CONFIG ----------------
@@ -17,6 +17,8 @@ st.title("🤖 Multi-Agent Research Assistant")
 st.markdown(
     "Generate AI-powered research reports using multiple AI agents."
 )
+
+st.caption(f"Free-tier demo: up to {MAX_RUNS_PER_SESSION} runs per session.")
 
 st.markdown("---")
 
@@ -105,7 +107,13 @@ if generate:
     if query.strip() == "":
         st.warning("Please enter a research topic.")
 
+    elif st.session_state.get("runs", 0) >= MAX_RUNS_PER_SESSION:
+        # Protects the shared free-tier quota; a new browser session resets it, so it only stops casual overuse
+        st.info("Demo limit reached for this session.")
+
     else:
+        st.session_state.runs = st.session_state.get("runs", 0) + 1
+
         # A new thread for every run, so a new topic never mixes with an old run's state
         st.session_state.thread_id = str(uuid.uuid4())
 
@@ -114,14 +122,13 @@ if generate:
         }
 
         with st.spinner("🤖 AI Agents are working on your report..."):
-            status_box.markdown("""
-### Current Status
-
-🔄 Supervisor Agent Running
-⏳ Search Agent Waiting
-⏳ Summarizer Agent Waiting
-⏳ Writer Agent Waiting
-""")
+            # "  \n" is a Markdown line break, written out so editors can't strip the trailing spaces
+            status_box.markdown("### Current Status\n\n" + "  \n".join([
+                "🔄 Supervisor Agent Running",
+                "⏳ Search Agent Waiting",
+                "⏳ Summarizer Agent Waiting",
+                "⏳ Writer Agent Waiting",
+            ]))
             app.invoke(initial_state, run_config())
 
 # ---------------- SHOW THE RUN ----------------
