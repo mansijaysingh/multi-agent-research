@@ -41,6 +41,30 @@ topics.
   write what these ~88.5k tokens would cost. I didn't fill this in, because I couldn't
   confirm the current price.
 
+## Free-tier rate limits (Google AI Studio, checked 2026-10-15 after the eval)
+
+| Model | Requests/min used / limit | Tokens/min used / limit | Requests/day used / limit |
+|---|---|---|---|
+| **Gemini 3.5 Flash Lite** (used for the eval) | **16 / 15** | 49.86K / 250K | **195 / 500** |
+| Gemini 3.8 Flash (the intended model) | 4 / 5 | 11.82K / 250K | **24 / 20**, over the limit |
+| Gemini 3.7 Flash | 5 / 5 | 3 / 250K | 6 / 20 |
+| Gemini 3.6 Flash | 4 / 5 | 4 / 250K | 6 / 20 |
+
+What this means for the project:
+- **Requests per minute, not tokens, are the tight limit.** One run makes about 6–8 Gemini
+  calls within about 30 s, and the lite model allows 15 a minute. That's why
+  `MAX_CONCURRENCY = 3` and the eval waits `--pause 15` between topics.
+- The lite model's per-minute count **peaked at 16, one over the limit**. No summary failed,
+  because the Gemini client retries with backoff. That's also why a few runs were slow
+  (the 22–41 s summary times measured in Step 4).
+- Per day, a full 15-topic eval is about 105 calls, about a fifth of the lite model's 500,
+  so it fits in one day. On `gemini-3.8-flash` (20 a day) it would take about 6 days. That's
+  why the eval ran on the lite model.
+- Tokens per minute are far below the limit (50K of 250K), so the 4,000-character limit on
+  each source is about cost, not about this limit.
+- The usage on Gemini 3.6 and 3.7 Flash didn't come from this project, which never used
+  those models. It's another app or tool using the same key or Google project.
+
 ## Is the judge just saying "yes" to everything?
 
 Groundedness was 1.00 on all 15 reports, so I tested the judge separately:
