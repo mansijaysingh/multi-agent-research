@@ -105,8 +105,9 @@ if generate:
             if failed_ids:
                 st.warning(f"{len(failed_ids)} source(s) couldn't be summarized: {failed_ids}")
 
+        # The report ends with its own Sources list; this shows everything search found
         if sources:
-            st.subheader("🔗 Sources")
-            for s in sources:
-                mark = " ⚠️ not summarized" if s["id"] in failed_ids else ""
-                st.markdown(f"{s['id']}. [{s['title'] or s['url']}]({s['url']}){mark}")
+            with st.expander(f"🔎 All sources searched ({len(sources)})"):
+                for s in sources:
+                    mark = " ⚠️ not summarized" if s["id"] in failed_ids else ""
+                    st.markdown(f"{s['id']}. [{s['title'] or s['url']}]({s['url']}){mark}")

@@ -42,8 +42,9 @@ def summarizer_agent(state):
 
     # batch keeps the input order, so each output lines up with its source
     for s, out in zip(sources, outs):
-        if isinstance(out, Exception):
-            print(f"summary failed for source {s['id']}: {out}")
+        if isinstance(out, Exception) or not out.text.strip():
+            reason = out if isinstance(out, Exception) else "empty response"
+            print(f"summary failed for source {s['id']}: {reason}")
             failed.append(s["id"])
         else:
             summaries.append({"source_id": s["id"], "text": out.text})

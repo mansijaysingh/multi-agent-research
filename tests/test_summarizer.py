@@ -16,6 +16,14 @@ def test_one_failure_keeps_others(monkeypatch):
     assert out["failed_sources"] == [2]
 
 
+
+def test_empty_summary_counts_as_failure(monkeypatch):
+    fake = [SimpleNamespace(text="a"), SimpleNamespace(text="  "), SimpleNamespace(text="c")]
+    monkeypatch.setattr(mod, "_summarize_all", lambda msgs: fake)
+    out = mod.summarizer_agent({"sources": _sources(1, 2, 3)})
+    assert [s["source_id"] for s in out["summaries"]] == [1, 3]
+    assert out["failed_sources"] == [2]
+
 def test_no_sources(monkeypatch):
     monkeypatch.setattr(mod, "_summarize_all", lambda msgs: [])
     out = mod.summarizer_agent({})
