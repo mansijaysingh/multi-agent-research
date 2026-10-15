@@ -77,7 +77,7 @@ Web search isn't called directly by the agent. It's a tool on a separate **MCP s
 - **Errors:** the tool *raises* errors (empty query, missing key, Tavily failure). The client turns them into `RuntimeError("MCP tool web_search failed: …")`, and the UI shows them in red.
 - **Try it by hand:** `mcp dev mcp_servers/search_server.py` opens the MCP Inspector (needs Node.js).
 - **Trade-off:** each search starts a subprocess. The round trip, including Tavily, is about 4–6 s in traces. A long-lived session is the obvious next optimisation.
-- Pinned to `mcp>=1.28,<2`: version 2 renamed the core classes.
+- Pinned to MCP SDK 1.x (1.30.0): version 2 renamed the core classes.
 
 ---
 
@@ -110,7 +110,7 @@ Web search isn't called directly by the agent. It's a tool on a separate **MCP s
 - **Groundedness:** the share of cited claims an LLM judge rates as supported by the cited notes, with one judge call per report. **Sanity check:** given 4 real claims and 2 planted false ones, the judge accepted the real ones and rejected both false ones.
 - **Cost:** about **$0.004 per report** at paid Flash-Lite prices ($0 on the free tier); the whole 15-topic eval would cost about $0.07.
 
-**What the eval changed.** The first run scored perfectly, including a nonsense topic (`qwxz plorbt vrenk`) that produced a confident, fully cited report about the film *Point Break*. The metrics checked the report against its *sources*, not against the *question*. Adding a relevance check to the summarizer, in the same call and at no extra cost, **turned that report into a clean fail**, and dropped 12 of 75 sources as off-topic across the set.
+**What the eval changed.** The first run scored perfectly, including a nonsense topic (`qwxz plorbt vrenk`) that produced a [confident, fully cited report about the film *Point Break*](evals/before_relevance_check/14.md). The metrics checked the report against its *sources*, not against the *question*. Adding a relevance check to the summarizer, in the same call and at no extra cost, **turned that report into a clean fail**, and dropped 12 of 75 sources as off-topic across the set.
 
 **Refine path, forced** (`--max-results 2` on the 3 niche topics): the refine ran 3/3 times, and the second search added +2, +2 and +1 sources. In one case the refined query drifted and both new sources were rejected as off-topic.
 
@@ -159,7 +159,7 @@ cd multi-agent-research
 python -m venv venv
 venv\Scripts\activate            # macOS/Linux: source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env             # then fill in the keys
+copy .env.example .env           # macOS/Linux: cp .env.example .env; then fill in the keys
 ```
 
 `.env`:

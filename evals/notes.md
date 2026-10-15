@@ -34,7 +34,7 @@ extra cost, since it's the same call. Topics 10–15, before and after:
 | #11 drones for apple pollination | report, 0 dropped | report, 0 dropped |
 | #12 biochar in Kenya | report, groundedness 1.00 | report, groundedness 0.92 |
 | #13 "the thing about the new rules" | report from 5 sources | report from 2 sources (3 dropped) |
-| **#14 `qwxz plorbt vrenk`** | **confident report about *Point Break*** | **clean fail: "no relevant sources found"** |
+| **#14 `qwxz plorbt vrenk`** | **[confident report about *Point Break*](before_relevance_check/14.md)** | **clean fail: "no relevant sources found"** |
 | #15 "is it good or bad" | report from 5 sources | report from 3 sources (2 dropped) |
 
 The check is lenient on vague topics. #13 and #15 still produce reports from whichever

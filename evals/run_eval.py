@@ -72,6 +72,9 @@ def run_topic(t: dict, reports: Path = REPORTS) -> dict:
             grd = groundedness(cited_claims(report, summaries), summaries)
             row["citation_coverage"] = "" if cov is None else round(cov, 3)
             row["groundedness"] = "" if grd is None else round(grd, 3)
+        else:
+            # A fail leaves no report, so remove any old one from an earlier run
+            (reports / f"{t['id']}.md").unlink(missing_ok=True)
 
     except Exception as e:  # anything that escapes the graph is a crash, not a clean fail
         row.update({"status": "crash", "error": f"{type(e).__name__}: {e}",
