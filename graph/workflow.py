@@ -1,5 +1,14 @@
+import sys
+
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
+
+# The nodes print emoji log lines. On Windows, when output goes to a file or pipe, Python
+# uses the cp1252 encoding, which can't write emojis, and the print would crash the run.
+# A log line must never break a run, so write UTF-8 and replace anything unprintable.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 from config import RECURSION_LIMIT
 from graph.state import AgentState

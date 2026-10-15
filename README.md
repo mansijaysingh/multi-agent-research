@@ -88,6 +88,10 @@ Web search isn't called directly by the agent. It's a tool on a separate **MCP s
 - **The Sources list is built from state**, so the model can't invent URLs. If the model writes its own references list anyway, it's cut off.
 - In the review screen you can **untick sources**. The edit is written back with `update_state(..., as_node="supervisor")`, so unticked sources disappear from both the citations and the Sources list.
 - Each browser session gets its own `thread_id`, and the page is drawn from the checkpoint, so Streamlit's reruns don't lose the paused run.
+- **Interface:**
+  - Progress is streamed node by node (`app.stream`), so you see "searched 5 sources → summarized 5" as it happens.
+  - A stepper (Search → Summarize → Review → Write) and run stats sit above the review cards.
+  - The finished report has tabs for the Report (with a Markdown download), the Sources (each marked cited, removed or not used) and the Run details.
 
 ---
 
