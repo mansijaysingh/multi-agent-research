@@ -1,0 +1,16 @@
+id,category,topic,model,status,error,sources,search_attempts,refined,failed_summaries,citation_coverage,groundedness,latency_s
+1,broad,impact of AI on customer support,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,16.8
+2,broad,benefits and risks of remote work,gemini-3.5-flash-lite,report,,5,1,False,0,0.923,1.0,20.3
+3,broad,how electric vehicles affect the power grid,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,38.3
+4,broad,role of microplastics in human health,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,33.6
+5,broad,pros and cons of nuclear energy for climate goals,gemini-3.5-flash-lite,report,,5,1,False,0,0.875,1.0,53.7
+6,recent,latest developments in AI regulation in 2026,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,31.5
+7,recent,state of humanoid robots in 2026,gemini-3.5-flash-lite,report,,5,1,False,0,0.923,1.0,40.4
+8,recent,recent progress in solid-state batteries,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,22.6
+9,recent,current trends in quantum computing hardware,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,32.2
+10,niche,zinc-air battery recycling in India,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,29.1
+11,niche,use of drones for pollination in apple orchards,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,17.2
+12,niche,biochar adoption by smallholder farmers in Kenya,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,20.6
+13,vague,the thing about the new rules,gemini-3.5-flash-lite,report,,5,1,False,0,0.9,1.0,30.7
+14,vague,qwxz plorbt vrenk,gemini-3.5-flash-lite,report,,5,1,False,0,1.0,1.0,14.3
+15,vague,is it good or bad,gemini-3.5-flash-lite,report,,5,1,False,0,0.889,1.0,18.8
