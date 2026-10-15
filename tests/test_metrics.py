@@ -42,6 +42,15 @@ def test_citation_after_full_stop_stays_with_its_claim():
     assert sentences(text) == ["Claim number one is stated here [2].", "Claim number two is also here [1]."]
 
 
+def test_split_before_sentence_starting_with_number_or_quote():
+    text = 'Adoption grew quickly across firms [1]. 80% of surveyed firms use it daily. "Agents" now handle triage [2].'
+    assert sentences(text) == [
+        "Adoption grew quickly across firms [1].",
+        "80% of surveyed firms use it daily.",
+        '"Agents" now handle triage [2].',
+    ]
+
+
 def test_bullets_are_separate_sentences():
     report = "## Key Findings\n- The first fact in the list [1].\n- The second fact in the list.\n"
     assert len(sentences(key_findings(report))) == 2

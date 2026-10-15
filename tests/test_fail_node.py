@@ -11,4 +11,4 @@ def test_no_sources():
 
 def test_every_summary_failed():
     state = {"sources": [{"id": 1, "title": "", "url": "u1", "content": ""}], "summaries": []}
-    assert fail_node(state) == {"error": "every source summary failed"}
+    assert fail_node(state) == {"error": "no relevant sources found (every source was off-topic or couldn't be summarized)"}

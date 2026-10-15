@@ -11,4 +11,5 @@ def fail_node(state):
         attempts = state.get("search_attempts", 0)
         return {"error": f"no sources found after {attempts} searches"}
 
-    return {"error": "every source summary failed"}
+    # Sources were found, but none survived the summarizer
+    return {"error": "no relevant sources found (every source was off-topic or couldn't be summarized)"}

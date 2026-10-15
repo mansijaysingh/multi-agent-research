@@ -3,6 +3,7 @@ Runs the research graph on the topics in evals/topics.json and writes evals/resu
 
     python -m evals.run_eval                      # all topics
     python -m evals.run_eval --only 1,2 --pause 10
+    python -m evals.run_eval --only 10,11,12 --max-results 2    # forces the refine path
 
 Results are merged by topic id, so topics can be run in batches across days
 (the Gemini free tier can't do all 15 in one go).
@@ -35,7 +36,7 @@ COLUMNS = ["id", "category", "topic", "model", "status", "error", "sources", "se
            "refined", "failed_summaries", "citation_coverage", "groundedness", "latency_s"]
 
 
-def run_topic(t: dict) -> dict:
+def run_topic(t: dict, reports: Path = REPORTS) -> dict:
     cfg = {
         "configurable": {"thread_id": str(uuid.uuid4())},
         "recursion_limit": RECURSION_LIMIT,
@@ -66,7 +67,7 @@ def run_topic(t: dict) -> dict:
         })
 
         if report:
-            (REPORTS / f"{t['id']}.md").write_text(f"# {t['topic']}\n\n{report}\n", encoding="utf-8")
+            (reports / f"{t['id']}.md").write_text(f"# {t['topic']}\n\n{report}\n", encoding="utf-8")
             cov = citation_coverage(report)
             grd = groundedness(cited_claims(report, summaries), summaries)
             row["citation_coverage"] = "" if cov is None else round(cov, 3)
@@ -79,15 +80,15 @@ def run_topic(t: dict) -> dict:
     return {c: row.get(c, "") for c in COLUMNS}
 
 
-def load_results() -> dict[int, dict]:
-    if not RESULTS.exists():
+def load_results(path: Path = RESULTS) -> dict[int, dict]:
+    if not path.exists():
         return {}
-    with RESULTS.open(newline="", encoding="utf-8") as f:
+    with path.open(newline="", encoding="utf-8") as f:
         return {int(r["id"]): r for r in csv.DictReader(f)}
 
 
-def save_results(rows: dict[int, dict]) -> None:
-    with RESULTS.open("w", newline="", encoding="utf-8") as f:
+def save_results(rows: dict[int, dict], path: Path = RESULTS) -> None:
+    with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS)
         w.writeheader()
         for i in sorted(rows):
@@ -128,28 +129,38 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", help="comma-separated topic ids, e.g. 1,2,3")
     parser.add_argument("--pause", type=float, default=10, help="seconds between topics (rate limit)")
+    parser.add_argument("--max-results", type=int,
+                        help="override MAX_RESULTS to force the refine path; writes results_max{N}.csv and reports_max{N}/")
     args = parser.parse_args()
+
+    results, reports = RESULTS, REPORTS
+    if args.max_results:
+        # The search node imported MAX_RESULTS by value, so patch it there
+        import agents.search_agent
+        agents.search_agent.MAX_RESULTS = args.max_results
+        results = HERE / f"results_max{args.max_results}.csv"
+        reports = HERE / f"reports_max{args.max_results}"
 
     topics = json.loads(TOPICS.read_text(encoding="utf-8"))
     if args.only:
         wanted = {int(x) for x in args.only.split(",")}
         topics = [t for t in topics if t["id"] in wanted]
 
-    REPORTS.mkdir(exist_ok=True)
-    rows = load_results()
+    reports.mkdir(exist_ok=True)
+    rows = load_results(results)
 
     for i, t in enumerate(topics):
         if i:
             time.sleep(args.pause)
         print(f"\n===== [{t['id']}] {t['category']}: {t['topic']}")
-        rows[t["id"]] = run_topic(t)
-        save_results(rows)  # save after every topic, so a crash or Ctrl+C keeps what's done
+        rows[t["id"]] = run_topic(t, reports)
+        save_results(rows, results)  # save after every topic, so a crash or Ctrl+C keeps what's done
         r = rows[t["id"]]
         print(f"===== [{t['id']}] {r['status']} | sources={r['sources']} | coverage={r['citation_coverage']}"
               f" | grounded={r['groundedness']} | {r['latency_s']}s {r['error'][:100]}")
 
     all_rows = list(rows.values())
-    print(f"\nSummary of {RESULTS.name} ({len(all_rows)} topics, model {MODEL}):\n")
+    print(f"\nSummary of {results.name} ({len(all_rows)} topics, model {MODEL}):\n")
     print(summary(all_rows, "ALL"))
     for cat in dict.fromkeys(r["category"] for r in sorted(all_rows, key=lambda r: int(r["id"]))):
         print(summary([r for r in all_rows if r["category"] == cat], cat))

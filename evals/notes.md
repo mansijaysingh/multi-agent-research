@@ -1,22 +1,64 @@
 # Evaluation notes (Step 8)
 
-Run on 2026-10-15 with `python -m evals.run_eval`, in 3 batches (topics 1–2, 3–8 and 9–15),
-using **gemini-3.5-flash-lite** for the agents and the judge. The free-tier quota for
+All 15 topics were run on 2026-10-15 with `python -m evals.run_eval` on the **final code**,
+which includes the relevance check and the corrected sentence split. They used
+**gemini-3.5-flash-lite** for the agents and the judge. The free-tier quota for
 `gemini-3.8-flash` was used up, so these numbers are for the lite model. Raw data is in
 `results.csv`, and every report is in `reports/`.
 
 ## Summary
 
-| Group | Topics | Completed | Report | Fail | Crash | Sources (mean) | Refined | Citation coverage | Groundedness | Latency (median / max) |
+| Group | Topics | Completed | Report | Fail | Crash | Sources (mean) | Off-topic / failed sources | Citation coverage | Groundedness | Latency (median / max) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **All** | 15 | 100% | 100% | 0% | 0 | 5.0 | 0% | **0.97** | **1.00** | **29.1 s** / 53.7 s |
-| broad | 5 | 100% | 100% | 0% | 0 | 5.0 | 0% | 0.96 | 1.00 | 33.6 s / 53.7 s |
-| recent | 4 | 100% | 100% | 0% | 0 | 5.0 | 0% | 0.98 | 1.00 | 31.9 s / 40.4 s |
-| niche | 3 | 100% | 100% | 0% | 0 | 5.0 | 0% | 1.00 | 1.00 | 20.6 s / 29.1 s |
-| vague | 3 | 100% | 100% | 0% | 0 | 5.0 | 0% | 0.93 | 1.00 | 18.8 s / 30.7 s |
+| **All** | 15 | **100%** | 93% | 7% | 0 | 5.0 | 12 of 75 | **0.96** | **0.99** | **26.1 s** / 40.2 s |
+| broad | 5 | 100% | 100% | 0% | 0 | 5.0 | 0 | 0.93 | 1.00 | 34.1 s / 40.2 s |
+| recent | 4 | 100% | 100% | 0% | 0 | 5.0 | 1 | 0.97 | 1.00 | 27.6 s / 33.4 s |
+| niche | 3 | 100% | 100% | 0% | 0 | 5.0 | 1 | 1.00 | 0.97 | 26.1 s / 31.3 s |
+| vague | 3 | 100% | 67% | 33% | 0 | 5.0 | 10 | 1.00 | 1.00 | 19.7 s / 22.3 s |
 
-No summaries failed, so the free-tier rate limit was never hit with 15 s pauses between
-topics.
+- The one fail is #14 `qwxz plorbt vrenk`. That's the correct outcome, a clean
+  "no relevant sources found", not a report.
+- None of the 12 dropped sources failed because of the rate limit. All were rejected as
+  off-topic.
+
+## Relevance check: before and after (Step 8 review fix 1)
+
+The first eval run had no relevance check, and the nonsense topic #14 got a confident,
+fully cited report about the film *Point Break* with perfect scores. The summarizer now gets
+the research topic in every message and replies `IRRELEVANT` for an off-topic source, at no
+extra cost, since it's the same call. Topics 10–15, before and after:
+
+| Topic | Before | After |
+|---|---|---|
+| #10 zinc-air recycling in India | report, 0 dropped | report, 1 dropped (a hearing-aid battery paper) |
+| #11 drones for apple pollination | report, 0 dropped | report, 0 dropped |
+| #12 biochar in Kenya | report, groundedness 1.00 | report, groundedness 0.92 |
+| #13 "the thing about the new rules" | report from 5 sources | report from 2 sources (3 dropped) |
+| **#14 `qwxz plorbt vrenk`** | **confident report about *Point Break*** | **clean fail: "no relevant sources found"** |
+| #15 "is it good or bad" | report from 5 sources | report from 3 sources (2 dropped) |
+
+The check is lenient on vague topics. #13 and #15 still produce reports from whichever
+sources the model judged "related", because a vague question can't really be judged
+off-topic.
+
+## Forced paths: refine (Step 8 review fix 2)
+
+Tavily returned 5 results for every topic, so `MIN_SOURCES = 3` never triggers a refine in
+normal runs. To measure the refine path, the 3 niche topics were run with only 2 results
+per search: `python -m evals.run_eval --only 10,11,12 --max-results 2`, which writes
+`results_max2.csv` and `reports_max2/`.
+
+| Topic | Refined query | Sources after 2nd search | Dropped as off-topic | Result |
+|---|---|---|---|---|
+| #10 | "zinc-air battery recycling infrastructure and startups in India" | 2 → 4 | 2 (both from the refined search) | report |
+| #11 | "artificial pollination drone technology cost effectiveness apple orchard trials" | 2 → 4 | 1 | report |
+| #12 | "economic barriers and drivers for biochar adoption among smallholder farmers in Kenya" | 2 → 3 | 0 | report |
+
+- The refine ran 3 out of 3 times.
+- The second search always added new sources (+2, +2, +1).
+- But in #10, the refined query drifted ("startups"), and both new sources were rejected as
+  off-topic. **Refining adds sources, but not always relevant ones.**
+- The fail path is covered by #14 above, and by the wrong-key runs in Steps 3 and 6.
 
 ## What the metrics mean
 
@@ -28,6 +70,9 @@ topics.
 - **Latency:** wall-clock time for the whole run, with approval automatic.
 
 ## Tokens and cost (from LangSmith, project `research-agent-v2-eval`)
+
+Measured on the first full 15-topic run, before the relevance check. That check adds no calls
+and only a short topic line per message, so the figures still hold.
 
 | | Calls | Tokens (in / out / total) | Per topic |
 |---|---|---|---|
@@ -69,8 +114,8 @@ What this means for the project:
   calls within about 30 s, and the lite model allows 15 a minute. That's why
   `MAX_CONCURRENCY = 3` and the eval waits `--pause 15` between topics.
 - The lite model's per-minute count **peaked at 16, one over the limit**. No summary failed,
-  because the Gemini client retries with backoff. That's also why a few runs were slow
-  (the 22–41 s summary times measured in Step 4).
+  because the Gemini client retries with backoff. That's also why some runs were slow (rate-limited
+  summary stages took 7.5–41.7 s in Step 4, against about 3 s normally).
 - Per day, a full 15-topic eval is about 105 calls, about a fifth of the lite model's 500,
   so it fits in one day. On `gemini-3.8-flash` (20 a day) it would take about 6 days. That's
   why the eval ran on the lite model.
@@ -81,7 +126,7 @@ What this means for the project:
 
 ## Is the judge just saying "yes" to everything?
 
-Groundedness was 1.00 on all 15 reports, so I tested the judge separately:
+In the first run groundedness was 1.00 on all 15 reports, so I tested the judge separately:
 1. I took 4 real claims from report 1 and added 2 planted false claims that cite the same
    notes: "AI chatbots have completely replaced all human agents worldwide since 2019" and
    "customer satisfaction fell by 80 percent after every AI deployment".
@@ -92,14 +137,15 @@ So it catches made-up facts. It probably misses subtle distortions (see report 3
 it's the same model that wrote the reports, so it may be lenient with its own style of
 wording.
 
-## What I found by reading 5 reports
+## What I found by reading 5 reports (first run, before the relevance check)
 
 - **#14 `qwxz plorbt vrenk` (vague):**
   - Tavily returned pages about the 1991 film *Point Break*, and the app wrote a confident,
     fully cited report about the film.
   - It scored **coverage 1.0, groundedness 1.0**.
   - **The metrics measure whether the report matches its sources, not whether it answers the
-    question asked.** This is the biggest gap.
+    question asked.** This was the biggest gap. **Fixed:** the relevance check now turns it
+    into a clean fail.
 - **#10 zinc-air battery recycling in India (niche):**
   - The Introduction is about India, but Key Findings is generic recycling advice, and 5 of
     its 6 sentences cite the same patent-search page [4].
@@ -123,11 +169,12 @@ wording.
 
 ## Limitations to state honestly (README)
 
-1. **The refine and fail paths never ran in the eval.** Tavily returned 5 results for every
-   topic, including nonsense, so "refined 0%" and "fail 0%" don't show those paths work.
-   Unit tests (`test_routing.py`) and forced runs in Steps 3 and 6 cover them instead.
-2. **No relevance check.** An off-topic or nonsense query still produces a confident report
-   (#14).
+1. **Refine never triggers on its own.** Tavily returns 5 results for almost anything, so
+   `MIN_SOURCES` is rarely hit. It's measured with a forced batch (`--max-results 2`), where
+   the refined query can drift (#10).
+2. **The relevance check is a single yes/no from the same model.** It stops nonsense (#14)
+   but is lenient on vague questions (#13, #15). An off-topic source can still slip through,
+   and a relevant one can be dropped.
 3. **Groundedness is judged by the same model** that wrote the report, it isn't perfect at
    catching subtle distortions (#3), and 15 topics is a small sample.
 4. **Source quality and dates aren't checked**: vendor content, and outdated forecasts

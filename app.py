@@ -75,7 +75,7 @@ def show_status(values, paused=False):
 
 def show_failed_warning(failed_ids):
     if failed_ids:
-        st.warning(f"{len(failed_ids)} source(s) couldn't be summarized: {failed_ids}")
+        st.warning(f"{len(failed_ids)} source(s) were off-topic or couldn't be summarized: {failed_ids}")
 
 
 def show_all_sources(sources, failed_ids):
@@ -83,7 +83,7 @@ def show_all_sources(sources, failed_ids):
     if sources:
         with st.expander(f"🔎 All sources searched ({len(sources)})"):
             for s in sources:
-                mark = " ⚠️ not summarized" if s["id"] in failed_ids else ""
+                mark = " ⚠️ not used (off-topic or not summarized)" if s["id"] in failed_ids else ""
                 st.markdown(f"{s['id']}. [{s['title'] or s['url']}]({s['url']}){mark}")
 
 

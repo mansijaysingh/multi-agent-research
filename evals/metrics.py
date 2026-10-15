@@ -28,8 +28,9 @@ def sentences(text: str) -> list[str]:
     # Move citations written after the full stop ("claim. [2]") in front of it ("claim [2].")
     # so they stay with their claim instead of starting the next sentence
     text = re.sub(r"([.!?])((?:[ \t]*\[\d+\])+)", r"\2\1", text)
-    # Split only where the next sentence starts with a capital letter or a bullet/bold marker
-    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z*\-])", text)
+    # Split only where the next sentence starts with a capital letter, a digit ("80% of firms..."),
+    # a quote, or a bullet/bold marker
+    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9*\-\"'“])", text)
     return [p.strip() for p in parts if len(p.strip()) >= 20]
 
 
