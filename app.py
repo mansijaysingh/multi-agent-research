@@ -63,6 +63,7 @@ if generate:
 
         error = result.get("error")
         sources = result.get("sources", [])
+        failed_ids = result.get("failed_sources") or []
 
         # The first stage without output is the one that failed; later ones were skipped
         stages = [
@@ -101,7 +102,11 @@ if generate:
                 st.markdown(final_report)
             st.markdown("---")
 
+            if failed_ids:
+                st.warning(f"{len(failed_ids)} source(s) couldn't be summarized: {failed_ids}")
+
         if sources:
             st.subheader("🔗 Sources")
             for s in sources:
-                st.markdown(f"{s['id']}. [{s['title'] or s['url']}]({s['url']})")
+                mark = " ⚠️ not summarized" if s["id"] in failed_ids else ""
+                st.markdown(f"{s['id']}. [{s['title'] or s['url']}]({s['url']}){mark}")

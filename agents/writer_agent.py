@@ -19,7 +19,6 @@ def writer_agent(state):
 
     try:
         query=state["query"]
-        #    report_length = state["report_length"]
 
         combined_summaries = "\n\n".join(m["text"] for m in summaries)
 
