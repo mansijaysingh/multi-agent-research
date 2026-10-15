@@ -44,7 +44,7 @@ topics.
 tokens, from ai.google.dev/gemini-api/docs/pricing, last updated 2026-10-15. Token counts:
 agent 33,580 in / 18,198 out; judge 33,260 in / 3,495 out.
 
-| Model | Price in / out | Agent (15 topics) | Judge | **Total eval** | Per report | 1,000 reports (agent only) |
+| Model | Price in / out | Agent (15 topics) | Judge | **Total eval** | Per report (agent only) | 1,000 reports (agent only) |
 |---|---|---|---|---|---|---|
 | **3.5 Flash-Lite** (used) | $0.30 / $2.50 | $0.056 | $0.019 | **$0.074** | **~$0.004** | **~$3.70** |
 | 3.8 Flash, until 31 Dec 2026 | $0.75 / $3.75 | $0.093 | $0.038 | $0.132 | ~$0.006 | ~$6.23 |
