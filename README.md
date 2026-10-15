@@ -120,7 +120,16 @@ Web search isn't called directly by the agent. It's a tool on a separate **MCP s
 
 Every run is traced. The nodes and Gemini calls are traced automatically, and the MCP call is its own `tool` step (`@traceable`), so each trace shows how long the search, the summaries (tokens and latency per source) and the writer take. The two halves of a paused run are grouped by `thread_id`.
 
-<!-- TODO (Step 9): add docs/trace.png (the LangSmith trace tree from Step 7) -->
+![LangSmith trace: supervisor → search (MCP tool step) → supervisor → summarizer with parallel Gemini calls](docs/trace.png)
+
+<details>
+<summary>A failing run in the same view (wrong Tavily key)</summary>
+
+Both `mcp_web_search` steps fail, the supervisor tries a refined query once, then ends in `fail` with the exact error, instead of crashing or writing an empty report.
+
+![LangSmith trace of a failed run: search fails, refine_query, search fails again, fail](docs/trace_error.png)
+
+</details>
 
 The trace showed that **the writer is the slowest step** (about 17 s for one call). It's also the most expensive, because output tokens cost 8× input on Flash-Lite.
 
