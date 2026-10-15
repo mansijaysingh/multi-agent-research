@@ -1,47 +1,32 @@
-from langchain_community.tools.tavily_search import TavilySearchResults
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-
+from mcp_client.client import call_tool
+from config import MAX_RESULTS
 
 
 def search_agent(state):
-  search_tool=TavilySearchResults(max_results=5)
-  """
-    Search agent:
-    Takes query from state
-    Returns search results inside state
     """
-  
-  try:
-      query = state['query']
-      
-      print(f"\n🔍 Searching for: {query}")
+    Search agent:
+    Takes the search query from state, searches through the MCP web_search tool
+    Returns numbered sources (old ones kept, duplicate URLs skipped), the attempt count and any error
+    """
+    query = state.get("search_query") or state["query"]
+    attempts = state.get("search_attempts", 0) + 1
 
-      results=search_tool.invoke(query)
-      if not results:
-         state["search_results"] = "No results found."
-         return state
-      
-      state["search_results"] = results
+    try:
+        print(f"\n🔍 Searching for: {query}")
+        data = call_tool("web_search", {"query": query, "max_results": MAX_RESULTS})
+    except Exception as e:
+        return {"search_attempts": attempts, "error": f"search failed: {e}"}
 
-      return state
-  except Exception as e:
-     state["search_results"]=f"Error occured: {str(e)}"
-     return state
-  
+    existing = state.get("sources", [])
+    seen = {s["url"] for s in existing}
+    sources = list(existing)
+    for r in data.get("results", []):
+        if r["url"] in seen:  # skips URLs from earlier searches and repeats within this batch
+            continue
+        seen.add(r["url"])
+        sources.append({"id": len(sources) + 1, **r})
 
-if __name__ == "__main__":
-   
-   test_state={
-      "query":"AI in healthcare"
+    if not sources:
+        return {"sources": [], "search_attempts": attempts, "error": "no results found"}
 
-   }
-
-   output=search_agent(test_state)
-
-   print("\n✅ SEARCH RESULTS:\n")
-
-   print(output["search_results"])
-
+    return {"sources": sources, "search_attempts": attempts, "error": None}

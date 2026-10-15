@@ -1,81 +1,65 @@
-from openai import OpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
-import os
+from config import MODEL, MAX_CONCURRENCY
 
 load_dotenv()
 
-client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.2)
+
+IRRELEVANT = "IRRELEVANT"
+
+SYSTEM = ("You summarise one web source for a research report. "
+          "Keep only facts stated in the source. 4-6 sentences, plain language. "
+          f"If the source has nothing to do with the research topic, reply with exactly {IRRELEVANT}.")
+
+MAX_CHARS = 4000  # per source, keeps token use low on the free tier
+
+
+def _summarize_all(msgs):
+    """
+    Runs all model calls concurrently. return_exceptions=True means a failed call
+    comes back as an Exception in its slot instead of losing every summary.
+    Kept as a module-level function so tests can monkeypatch it
+    (Pydantic won't let you patch llm.batch directly).
+    """
+    return llm.batch(msgs, config={"max_concurrency": MAX_CONCURRENCY}, return_exceptions=True)
 
 
 def summarizer_agent(state):
-  """
-    Takes search results from state
-    Summarizes them using GPT
-    Stores summaries back in state
     """
-  try: 
-      search_results=state["search_results"]
+    Takes sources from state
+    Summarizes them all in parallel using Gemini, dropping sources that don't match the topic
+    Returns summaries and the ids of sources that failed or were irrelevant
+    """
+    sources = state.get("sources", [])
+    topic = state.get("query", "")
 
-      summaries=[]
+    # The topic is in every message so the model can reject off-topic sources
+    # (the relevance check costs no extra calls)
+    msgs = [
+        [("system", SYSTEM),
+         ("user", f"Research topic: {topic}\nTitle: {s['title']}\n\n{(s.get('content') or '')[:MAX_CHARS]}")]
+        for s in sources
+    ]
 
-      for result in search_results:
-         
-         content= result.get("content", " ")
+    outs = _summarize_all(msgs) if msgs else []
 
-         prompt = f"""
-You are an expert research summarizer.
+    summaries = []
+    failed = []
 
-Read the research content below and create a clear, concise, and informative summary.
+    # batch keeps the input order, so each output lines up with its source
+    for s, out in zip(sources, outs):
+        if isinstance(out, Exception):
+            reason = out
+        elif not out.text.strip():
+            reason = "empty response"
+        elif out.text.strip().rstrip(".") == IRRELEVANT:
+            reason = "irrelevant to the topic"
+        else:
+            summaries.append({"source_id": s["id"], "text": out.text})
+            continue
+        print(f"summary failed for source {s['id']}: {reason}")
+        failed.append(s["id"])
 
-Requirements:
-- Focus on the most important insights
-- Avoid unnecessary details
-- Keep the summary professional and easy to understand
-- Use simple and clean language
-
-Research Content:
-{content}
-"""
-
-         response=client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-               {
-                  "role":"user",
-                  "content":prompt
-               }
-            ]
-         )
-
-         summary=response.choices[0].message.content
-         summaries.append(summary)
-
-      state["summaries"]=summaries
-      return state
-  except Exception as e:
-     
-     state["summaries"]=[f"Error:{str(e)}"]
-     return state
-  
-
-if __name__ == "__main__":
-   
-   dummy_state={
-      "search_results":[
-         {
-            "content": "AI is transforming healthcare through diagnosis automation and predictive analytics."
-         },
-
-         {
-            "content": "Hospitals are using AI chatbots to improve patient communication and reduce workload."
-         }
-      ]
-   }
-
-   output=summarizer_agent(dummy_state)
-
-   print("\n✅ SUMMARIES:\n")
-
-   for summary in output["summaries"]:
-      print(summary)
-      print("\n------------------\n")
+    # Once the summarizer has run, any earlier search error is stale
+    return {"summaries": summaries, "failed_sources": failed, "error": None}

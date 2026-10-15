@@ -1,0 +1,17 @@
+[
+  {"id": 1,  "category": "broad",  "topic": "impact of AI on customer support"},
+  {"id": 2,  "category": "broad",  "topic": "benefits and risks of remote work"},
+  {"id": 3,  "category": "broad",  "topic": "how electric vehicles affect the power grid"},
+  {"id": 4,  "category": "broad",  "topic": "role of microplastics in human health"},
+  {"id": 5,  "category": "broad",  "topic": "pros and cons of nuclear energy for climate goals"},
+  {"id": 6,  "category": "recent", "topic": "latest developments in AI regulation in 2026"},
+  {"id": 7,  "category": "recent", "topic": "state of humanoid robots in 2026"},
+  {"id": 8,  "category": "recent", "topic": "recent progress in solid-state batteries"},
+  {"id": 9,  "category": "recent", "topic": "current trends in quantum computing hardware"},
+  {"id": 10, "category": "niche",  "topic": "zinc-air battery recycling in India"},
+  {"id": 11, "category": "niche",  "topic": "use of drones for pollination in apple orchards"},
+  {"id": 12, "category": "niche",  "topic": "biochar adoption by smallholder farmers in Kenya"},
+  {"id": 13, "category": "vague",  "topic": "the thing about the new rules"},
+  {"id": 14, "category": "vague",  "topic": "qwxz plorbt vrenk"},
+  {"id": 15, "category": "vague",  "topic": "is it good or bad"}
+]

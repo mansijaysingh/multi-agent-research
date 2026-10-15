@@ -1,0 +1,10 @@
+[theme]
+base = "light"
+primaryColor = "#2F5D46"            # dark forest green accent (buttons)
+backgroundColor = "#EEF3EF"         # soft sage
+secondaryBackgroundColor = "#E2EAE4"
+textColor = "#2F3A33"
+font = "sans serif"                 # Nunito is loaded in app.py CSS (Google Fonts)
+
+[client]
+toolbarMode = "minimal"

@@ -1,0 +1,4 @@
+id,category,topic,model,status,error,sources,search_attempts,refined,failed_summaries,citation_coverage,groundedness,latency_s
+10,niche,zinc-air battery recycling in India,gemini-3.5-flash-lite,report,,4,2,True,2,1.0,1.0,28.5
+11,niche,use of drones for pollination in apple orchards,gemini-3.5-flash-lite,report,,4,2,True,1,1.0,1.0,49.2
+12,niche,biochar adoption by smallholder farmers in Kenya,gemini-3.5-flash-lite,report,,3,2,True,0,1.0,1.0,35.5
