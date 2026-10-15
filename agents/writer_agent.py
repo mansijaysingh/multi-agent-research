@@ -48,8 +48,10 @@ Notes:
 """
         body = _write(prompt)
 
-        # The model sometimes adds its own list anyway; ours is the only one we trust
-        body = re.split(r"\n#{1,6}[ \t]*(?:Sources|References)\b", body, flags=re.IGNORECASE)[0].rstrip()
+        # The model sometimes adds its own list anyway; ours is the only one we trust.
+        # Only a heading that is exactly "Sources" or "References" counts, so a heading
+        # like "### Sources of Error" inside the report is kept.
+        body = re.split(r"(?im)^#{1,6}[ \t]*(?:sources|references)[ \t]*:?[ \t]*$", body)[0].rstrip()
 
         # Only summarized sources can be cited: drop any other [n] (and the spaces before it, not line breaks)
         valid = {m["source_id"] for m in summaries}

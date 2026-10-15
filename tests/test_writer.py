@@ -38,6 +38,13 @@ def test_model_sources_list_is_dropped(monkeypatch):
     assert report.count("## Sources") == 1 and "References" not in report
 
 
+def test_heading_starting_with_sources_is_kept(monkeypatch):
+    _fake(monkeypatch, "Intro [1].\n\n### Sources of Error\nBias [2].\n\n## Conclusion\nDone.")
+    report = mod.writer_agent(STATE)["final_report"]
+    assert "### Sources of Error" in report
+    assert "Bias [2]." in report and "Done." in report
+
+
 def test_invalid_citation_at_line_start_keeps_line_break(monkeypatch):
     _fake(monkeypatch, "Line one [1].\n[9] Line two.")
     report = mod.writer_agent(STATE)["final_report"]

@@ -1,18 +1,22 @@
 import asyncio, json, os, sys
 from pathlib import Path
 
+from langsmith import traceable
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
 
 SERVER = Path(__file__).resolve().parent.parent / "mcp_servers" / "search_server.py"
 
-# sys.executable: the server runs in the same Python environment as the app.
-# env: pass our environment through so the server sees TAVILY_API_KEY (needed on Streamlit Cloud).
-PARAMS = StdioServerParameters(command=sys.executable, args=[str(SERVER)], env=dict(os.environ))
+
+def _server_params() -> StdioServerParameters:
+    # sys.executable: the server runs in the same Python environment as the app.
+    # env: pass our environment through so the server sees TAVILY_API_KEY (needed on Streamlit Cloud).
+    # Built per call, not at import, so it includes anything load_dotenv() added after this module loaded.
+    return StdioServerParameters(command=sys.executable, args=[str(SERVER)], env=dict(os.environ))
 
 
 async def _call(tool: str, args: dict) -> dict:
-    async with stdio_client(PARAMS) as (read, write):
+    async with stdio_client(_server_params()) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
             result = await session.call_tool(tool, arguments=args)
@@ -33,6 +37,9 @@ async def _call(tool: str, args: dict) -> dict:
     return {}
 
 
+# Shows up in LangSmith as its own "tool" step inside the search node,
+# with the tool name and args as inputs, the results as output, and errors in red.
+@traceable(name="mcp_web_search", run_type="tool")
 def call_tool(tool: str, args: dict) -> dict:
     """Sync wrapper so LangGraph nodes and Streamlit stay synchronous."""
     return asyncio.run(_call(tool, args))

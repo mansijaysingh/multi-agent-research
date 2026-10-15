@@ -30,8 +30,18 @@ status_box = st.sidebar.empty()
 
 
 def run_config():
-    """Config for the current run; the thread_id picks its checkpoint."""
-    return {"configurable": {"thread_id": st.session_state.thread_id}, "recursion_limit": RECURSION_LIMIT}
+    """
+    Config for the current run; the thread_id picks its checkpoint.
+    run_name, tags and metadata label the run in LangSmith; the thread_id in metadata
+    groups the part before approval and the part after it into one thread.
+    """
+    return {
+        "configurable": {"thread_id": st.session_state.thread_id},
+        "recursion_limit": RECURSION_LIMIT,
+        "run_name": "research-run",
+        "tags": ["streamlit"],
+        "metadata": {"thread_id": st.session_state.thread_id},
+    }
 
 
 def show_status(values, paused=False):
