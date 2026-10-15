@@ -34,12 +34,26 @@ topics.
 | Agent graph (summaries + writer) | 90 (6 per topic) | 33,580 / 18,198 / **51,778** | ~3,450 |
 | Judge | 15 (1 per topic) | **36,755** total | ~2,450 |
 
-- The judge costs about 70% as much as the whole agent. It re-sends the cited notes for every
-  claim, which makes the prompt large.
+- The judge uses about 70% as many tokens as the whole agent. It re-sends the cited notes for
+  every claim, which makes the prompt large. But those tokens are mostly input (33,260 in,
+  3,495 out), which is the cheap side, so the judge's *cost* is only about a third of the
+  agent's.
 - The cost on the free tier is $0.
-- **TODO:** look up the paid price of `gemini-3.5-flash-lite` on the Gemini pricing page, and
-  write what these ~88.5k tokens would cost. I didn't fill this in, because I couldn't
-  confirm the current price.
+
+**What the eval would cost at paid prices.** The prices are the Standard paid tier per 1M
+tokens, from ai.google.dev/gemini-api/docs/pricing, last updated 2026-10-15. Token counts:
+agent 33,580 in / 18,198 out; judge 33,260 in / 3,495 out.
+
+| Model | Price in / out | Agent (15 topics) | Judge | **Total eval** | Per report | 1,000 reports (agent only) |
+|---|---|---|---|---|---|---|
+| **3.5 Flash-Lite** (used) | $0.30 / $2.50 | $0.056 | $0.019 | **$0.074** | **~$0.004** | **~$3.70** |
+| 3.8 Flash, until 31 Dec 2026 | $0.75 / $3.75 | $0.093 | $0.038 | $0.132 | ~$0.006 | ~$6.23 |
+| 3.8 Flash, from 1 Jan 2027 | $1.50 / $7.50 | $0.187 | $0.076 | $0.263 | ~$0.012 | ~$12.46 |
+
+- **Output tokens drive the cost.** Output is 8× the input price on Flash-Lite, so the
+  writer's long report is the most expensive single call, as well as the slowest (16.7 s in
+  the Step 7 trace).
+- Tavily isn't included; its free plan covered all of this.
 
 ## Free-tier rate limits (Google AI Studio, checked 2026-10-15 after the eval)
 
