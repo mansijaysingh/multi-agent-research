@@ -1,8 +1,7 @@
 langgraph
 langchain-core
 langchain-google-genai
-langchain-community
-mcp>=1.28,<2
+mcp[cli]>=1.28,<2
 tavily-python
 langsmith
 streamlit

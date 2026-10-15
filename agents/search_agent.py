@@ -1,43 +1,31 @@
-from langchain_community.tools.tavily_search import TavilySearchResults
-from dotenv import load_dotenv
-import os
+from mcp_client.client import call_tool
+from config import MAX_RESULTS
 
-load_dotenv()
-
-search_tool=TavilySearchResults(max_results=5)
 
 def search_agent(state):
   """
     Search agent:
-    Takes the search query from state
-    Returns numbered sources, the attempt count and any error
+    Takes the search query from state, searches through the MCP web_search tool
+    Returns numbered sources (old ones kept, duplicate URLs skipped), the attempt count and any error
     """
   query = state.get("search_query") or state["query"]
   attempts = state.get("search_attempts", 0) + 1
 
   try:
       print(f"\n🔍 Searching for: {query}")
-
-      results = search_tool.invoke(query)
-
-      # TavilySearchResults returns errors (e.g. a bad API key) as a string instead of raising
-      if isinstance(results, str):
-         raise RuntimeError(results)
-
-      sources = []
-      for r in results or []:
-         if not r.get("url"):
-            continue
-         sources.append({
-            "id": len(sources) + 1,
-            "title": r.get("title", ""),
-            "url": r["url"],
-            "content": r.get("content", ""),
-         })
-
-      if not sources:
-         return {"sources": [], "search_attempts": attempts, "error": "no results found"}
-
-      return {"sources": sources, "search_attempts": attempts, "error": None}
+      data = call_tool("web_search", {"query": query, "max_results": MAX_RESULTS})
   except Exception as e:
      return {"search_attempts": attempts, "error": f"search failed: {e}"}
+
+  existing = state.get("sources", [])
+  seen = {s["url"] for s in existing}
+  new = [r for r in data.get("results", []) if r["url"] not in seen]
+
+  sources = existing + [
+     {"id": len(existing) + i + 1, **r} for i, r in enumerate(new)
+  ]
+
+  if not sources:
+     return {"sources": [], "search_attempts": attempts, "error": "no results found"}
+
+  return {"sources": sources, "search_attempts": attempts, "error": None}

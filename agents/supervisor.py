@@ -1,5 +1,5 @@
 def supervisor(state):
-  """"
+  """
    Supervisor Agent
 
     Initializes the workflow state.

@@ -50,5 +50,5 @@ if __name__ == "__main__":
 
   print("\n✅ FINAL REPORT:\n")
 
-  print(result["final_report"])
+  print(result.get("final_report") or result.get("error"))
   

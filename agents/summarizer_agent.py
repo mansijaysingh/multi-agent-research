@@ -44,7 +44,8 @@ Research Content:
          response = llm.invoke(prompt)
 
          summaries.append({"source_id": s["id"], "text": response.text})
-      except Exception:
+      except Exception as e:
+         print(f"summary failed for source {s['id']}: {e}")
          failed.append(s["id"])
 
   return {"summaries": summaries, "failed_sources": failed}
