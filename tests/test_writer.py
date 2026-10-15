@@ -31,6 +31,19 @@ def test_sources_list_built_from_state(monkeypatch):
     assert report.endswith("- [1] [T1](https://e.com/1)\n- [2] [T2](https://e.com/2)")
 
 
+def test_model_sources_list_is_dropped(monkeypatch):
+    _fake(monkeypatch, "Body [1].\n\n## References\n- made up https://fake.com")
+    report = mod.writer_agent(STATE)["final_report"]
+    assert "fake.com" not in report
+    assert report.count("## Sources") == 1 and "References" not in report
+
+
+def test_invalid_citation_at_line_start_keeps_line_break(monkeypatch):
+    _fake(monkeypatch, "Line one [1].\n[9] Line two.")
+    report = mod.writer_agent(STATE)["final_report"]
+    assert "Line one [1].\n Line two." in report
+
+
 def test_prompt_uses_numbered_notes(monkeypatch):
     seen = {}
 

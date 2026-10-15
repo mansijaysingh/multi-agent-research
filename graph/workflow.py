@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from config import RECURSION_LIMIT
 from graph.state import AgentState
@@ -44,9 +45,12 @@ g.add_edge("writer", END)
 g.add_edge("fail", END)
 
 # ---------------- COMPILE ----------------
-# MemorySaver and interrupt_before=["writer"] come in Step 6 (human review)
+# The checkpointer saves state after every node; the run pauses before the writer
+# so a human can review the sources and summaries, then resumes with invoke(None, cfg).
+# MemorySaver keeps checkpoints in memory, so a paused run is lost if the app restarts.
+# In production you'd use SqliteSaver or a Postgres checkpointer instead.
 
-app = g.compile()
+app = g.compile(checkpointer=MemorySaver(), interrupt_before=["writer"])
 
 
 # ---------------- TEST ----------------
@@ -56,8 +60,17 @@ if __name__ == "__main__":
         "query": "Future of AI in healthcare"
     }
 
-    result = app.invoke(initial_state, {"recursion_limit": RECURSION_LIMIT})
+    # With a checkpointer every run needs a thread_id
+    cfg = {"configurable": {"thread_id": "cli-test"}, "recursion_limit": RECURSION_LIMIT}
+
+    app.invoke(initial_state, cfg)
+
+    if app.get_state(cfg).next == ("writer",):
+        print("\n⏸ paused before writer, auto-approving")
+        app.invoke(None, cfg)
+
+    values = app.get_state(cfg).values
 
     print("\n✅ FINAL REPORT:\n")
 
-    print(result.get("final_report") or result.get("error"))
+    print(values.get("final_report") or values.get("error"))

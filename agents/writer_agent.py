@@ -48,9 +48,12 @@ Notes:
 """
         body = _write(prompt)
 
-        # Only summarized sources can be cited: drop any other [n] (and the space before it)
+        # The model sometimes adds its own list anyway; ours is the only one we trust
+        body = re.split(r"\n#{1,6}[ \t]*(?:Sources|References)\b", body, flags=re.IGNORECASE)[0].rstrip()
+
+        # Only summarized sources can be cited: drop any other [n] (and the spaces before it, not line breaks)
         valid = {m["source_id"] for m in summaries}
-        body = re.sub(r"\s*\[(\d+)\]", lambda m: m.group(0) if int(m.group(1)) in valid else "", body)
+        body = re.sub(r"[ \t]*\[(\d+)\]", lambda m: m.group(0) if int(m.group(1)) in valid else "", body)
 
         # The Sources list comes from state, never from the model, so URLs can't be made up
         refs = "\n".join(
