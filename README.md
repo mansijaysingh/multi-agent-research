@@ -10,8 +10,8 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
 [![Tests](https://img.shields.io/badge/pytest-52_passing-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 
-🔗 **[Live Demo](#)** &nbsp;|&nbsp; 🎬 **[2-minute video](#)** &nbsp;|&nbsp; 📂 **[GitHub Repo](https://github.com/mansijaysingh/multi-agent-research)**
-<!-- TODO (Step 9): replace the two # links with the Streamlit Cloud URL and the YouTube link -->
+🔗 **[Live Demo](https://multi-agent-research-mansijaysingh.streamlit.app/)** &nbsp;|&nbsp; 📂 **[GitHub Repo](https://github.com/mansijaysingh/multi-agent-research)**
+<!-- TODO: add "🎬 [2-minute video](youtube-link)" here once it's recorded -->
 
 <!-- TODO (Step 9): add docs/demo.gif (review screen → approve → cited report) -->
 
